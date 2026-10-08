@@ -1,0 +1,54 @@
+name: Bincom OpenProject CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Docker Compose
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare CI environment
+        run: |
+          cp .env.example .env
+          {
+            echo "PGDATA=pgdata"
+            echo "OPDATA=opdata"
+            echo "PORT=127.0.0.1:8081"
+            echo "OPENPROJECT_HOST__NAME=localhost:8081"
+          } >> .env
+
+      - name: Validate Docker Compose
+        run: |
+          docker compose config --quiet
+
+      - name: Validate control configuration
+        run: |
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.control.yml \
+            config --quiet
+
+      - name: Verify health-check script syntax
+        run: |
+          bash -n scripts/health-check.sh
+
+      - name: Verify required deployment files
+        run: |
+          test -f docker-compose.yml
+          test -f docker-compose.control.yml
+          test -f .env.example
+          test -f README.md
+          test -f proxy/Caddyfile.template
+          echo "All required deployment files exist."
