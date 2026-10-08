@@ -1,0 +1,27 @@
+.env
+
+docker-compose.override.yml
+backups/
+
+.env
+.env.*
+!.env.example
+backups/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Database and user data
+backups/
+pgdata/
+opdata/
+assets/
+*.sql
+*.dump
+
+# macOS
+.DS_Store
